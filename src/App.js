@@ -109,38 +109,29 @@ function App() {
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           {trainingRequired && (
-            <>
-              <div>
-                <label className="block font-medium">Training Session</label>
-                <select value={trainingSession} onChange={e => setTrainingSession(Number(e.target.value))} className="border p-1 w-full">
-                  {[1, 2, 3].map(n => <option key={n}>{n}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block font-medium">Performed in (Training)</label>
-                <select value={pilotInfo.trainingLocation} onChange={e => handleChange("trainingLocation", e.target.value)} className="border p-1 w-full">
-                  {["FSTD", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
-                </select>
-              </div>
-            </>
+            <div>
+              <label className="block font-medium">Instructor Initials</label>
+              <input
+                type="text"
+                value={pilotInfo.trainingInstructor}
+                onChange={e => handleChange("trainingInstructor", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
           )}
           {checkingRequired && (
-            <>
-              <div>
-                <label className="block font-medium">Checking Session</label>
-                <select value={checkingSession} onChange={e => setCheckingSession(Number(e.target.value))} className="border p-1 w-full">
-                  {[1, 2, 3, 4, 5, 6].map(n => <option key={n}>{n}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block font-medium">Performed in (Checking)</label>
-                <select value={pilotInfo.checkingLocation} onChange={e => handleChange("checkingLocation", e.target.value)} className="border p-1 w-full">
-                  {["FFS", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
-                </select>
-              </div>
-            </>
+            <div>
+              <label className="block font-medium">Examiner Initials</label>
+              <input
+                type="text"
+                value={pilotInfo.checkingInstructor}
+                onChange={e => handleChange("checkingInstructor", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
           )}
         </div>
+
 
         {Object.entries(sectionTitles).map(([section, title]) => {
           const tasksInSection = visibleTasks.filter(id => id.startsWith(section));
