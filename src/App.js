@@ -1,11 +1,15 @@
 import React, { useState, useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import SignatureCanvas from "react-signature-canvas";
 import { allTasks, taskSchedule, sectionTitles } from "./taskData";
 import "./index.css";
 
 function App() {
   const exportRef = useRef();
+  const sigInstructor = useRef();
+  const sigExaminer = useRef();
+  const sigPilot = useRef();
 
   const [trainingRequired, setTrainingRequired] = useState(false);
   const [checkingRequired, setCheckingRequired] = useState(true);
@@ -18,8 +22,7 @@ function App() {
     trainingLocation: "FSTD", checkingLocation: "FFS",
     trainingInstructor: "", checkingInstructor: "",
     instructorName: "", instructorLicense: "", date: "",
-    examinerName: "", examinerLicense: "", examinerDate: "",
-    pilotSignature: "", instructorSignature: "", examinerSignature: ""
+    examinerName: "", examinerLicense: "", examinerDate: ""
   });
 
   const gradeOptions = ["", "E", "G", "A", "P", "U"];
@@ -92,85 +95,50 @@ function App() {
           </div>
         </div>
 
-        {/* Session Settings */}
-        <div className="flex flex-wrap items-center gap-6 mt-4 border p-2 rounded bg-gray-100">
-          <label className="flex items-center gap-1">
-            <input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} />
-            <span>Training Required</span>
-          </label>
-          <label className="flex items-center gap-1">
-            <input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} />
-            <span>Checking Required</span>
-          </label>
-          <label className="flex items-center gap-1">
-            <input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} />
-            <span>Show All Training/Checking Items</span>
-          </label>
-        </div>
-
-        {/* Initials */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          {trainingRequired && (
-            <div>
-              <label className="block font-medium">Instructor Initials</label>
-              <input
-                type="text"
-                value={pilotInfo.trainingInstructor}
-                onChange={e => handleChange("trainingInstructor", e.target.value)}
-                className="border p-1 w-full"
-              />
-            </div>
-          )}
-          {checkingRequired && (
-            <div>
-              <label className="block font-medium">Examiner Initials</label>
-              <input
-                type="text"
-                value={pilotInfo.checkingInstructor}
-                onChange={e => handleChange("checkingInstructor", e.target.value)}
-                className="border p-1 w-full"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Session Numbers and Locations */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        {/* Sessions in a single line */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 bg-gray-50 p-4 border rounded">
           {trainingRequired && (
             <>
-              <div>
-                <label className="block font-medium">Training Session</label>
-                <select value={trainingSession} onChange={e => setTrainingSession(Number(e.target.value))} className="border p-1 w-full">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} />
+                <label className="font-medium">Training Required</label>
+                <select value={trainingSession} onChange={e => setTrainingSession(Number(e.target.value))} className="border p-1">
                   {[1, 2, 3].map(n => <option key={n}>{n}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block font-medium">Performed in (Training)</label>
-                <select value={pilotInfo.trainingLocation} onChange={e => handleChange("trainingLocation", e.target.value)} className="border p-1 w-full">
+                <select value={pilotInfo.trainingLocation} onChange={e => handleChange("trainingLocation", e.target.value)} className="border p-1">
                   {["FSTD", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
                 </select>
+                <input type="text" placeholder="Instructor Initials" value={pilotInfo.trainingInstructor} onChange={e => handleChange("trainingInstructor", e.target.value)} className="border p-1" />
               </div>
             </>
           )}
+
           {checkingRequired && (
             <>
-              <div>
-                <label className="block font-medium">Checking Session</label>
-                <select value={checkingSession} onChange={e => setCheckingSession(Number(e.target.value))} className="border p-1 w-full">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} />
+                <label className="font-medium">Checking Required</label>
+                <select value={checkingSession} onChange={e => setCheckingSession(Number(e.target.value))} className="border p-1">
                   {[1, 2, 3, 4, 5, 6].map(n => <option key={n}>{n}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block font-medium">Performed in (Checking)</label>
-                <select value={pilotInfo.checkingLocation} onChange={e => handleChange("checkingLocation", e.target.value)} className="border p-1 w-full">
+                <select value={pilotInfo.checkingLocation} onChange={e => handleChange("checkingLocation", e.target.value)} className="border p-1">
                   {["FFS", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
                 </select>
+                <input type="text" placeholder="Examiner Initials" value={pilotInfo.checkingInstructor} onChange={e => handleChange("checkingInstructor", e.target.value)} className="border p-1" />
               </div>
             </>
           )}
         </div>
 
-        {/* Task Table */}
+        {/* Show All Toggle */}
+        <div className="mt-4">
+          <label className="inline-flex items-center">
+            <input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} />
+            <span className="ml-2">Show All Training/Checking Items</span>
+          </label>
+        </div>
+
+        {/* Table */}
         {Object.entries(sectionTitles).map(([section, title]) => {
           const tasksInSection = visibleTasks.filter(id => id.startsWith(section));
           if (tasksInSection.length === 0) return null;
@@ -213,45 +181,29 @@ function App() {
           );
         })}
 
-        {/* Signatures */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Signature Section */}
+        <div className="mt-8 border-t pt-4 grid grid-cols-1 gap-4">
           <div>
-            <label className="font-medium block">Student Signature</label>
-            <input
-              type="text"
-              value={pilotInfo.pilotSignature}
-              onChange={e => handleChange("pilotSignature", e.target.value)}
-              className="border p-1 w-full"
-            />
+            <h3 className="font-medium mb-1">Pilot Signature</h3>
+            <SignatureCanvas penColor="black" canvasProps={{ width: 300, height: 100, className: "border" }} ref={sigPilot} />
           </div>
+
           {trainingRequired && (
             <div>
-              <label className="font-medium block">Instructor Signature</label>
-              <input type="text" value={pilotInfo.instructorSignature} onChange={e => handleChange("instructorSignature", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Instructor Name</label>
-              <input type="text" value={pilotInfo.instructorName} onChange={e => handleChange("instructorName", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Instructor License</label>
-              <input type="text" value={pilotInfo.instructorLicense} onChange={e => handleChange("instructorLicense", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Date</label>
-              <input type="date" value={pilotInfo.date} onChange={e => handleChange("date", e.target.value)} className="border p-1 w-full" />
+              <h3 className="font-medium mb-1">Instructor Signature</h3>
+              <SignatureCanvas penColor="black" canvasProps={{ width: 300, height: 100, className: "border" }} ref={sigInstructor} />
             </div>
           )}
+
           {checkingRequired && (
             <div>
-              <label className="font-medium block">Examiner Name</label>
-              <input type="text" value={pilotInfo.examinerName} onChange={e => handleChange("examinerName", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Examiner License</label>
-              <input type="text" value={pilotInfo.examinerLicense} onChange={e => handleChange("examinerLicense", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Date</label>
-              <input type="date" value={pilotInfo.examinerDate} onChange={e => handleChange("examinerDate", e.target.value)} className="border p-1 w-full" />
-              <label className="font-medium block">Examiner Signature</label>
-              <input type="text" value={pilotInfo.examinerSignature} onChange={e => handleChange("examinerSignature", e.target.value)} className="border p-1 w-full" />
+              <h3 className="font-medium mb-1">Examiner Signature</h3>
+              <SignatureCanvas penColor="black" canvasProps={{ width: 300, height: 100, className: "border" }} ref={sigExaminer} />
             </div>
           )}
         </div>
       </div>
 
-      {/* PDF Button */}
       <button onClick={generatePDF} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Generate PDF
       </button>
