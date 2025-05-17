@@ -6,7 +6,7 @@
     "node": "18.x"
   },
   "scripts": {
-    "start": "vite"
+    "dev": "vite",
   },
   "dependencies": {
     "react": "^18.2.0",
