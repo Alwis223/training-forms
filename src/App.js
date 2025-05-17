@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { allTasks, sectionTitles, taskSchedule } from "./taskData";
 import "./index.css";
@@ -14,8 +13,9 @@ function App() {
     name: "", code: "", license: "", aircraftType: "H25B", function: "PIC", opcValidUntil: "",
     trainingLocation: "FSTD", checkingLocation: "FFS",
     trainingInstructor: "", checkingInstructor: "",
-    instructorName: "", instructorLicense: "", date: "", pilotSignature: "", instructorSignature: "",
-    examinerName: "", examinerLicense: "", examinerDate: "", examinerSignature: ""
+    instructorName: "", instructorLicense: "", date: "",
+    examinerName: "", examinerLicense: "", examinerDate: "",
+    pilotSignature: "", instructorSignature: "", examinerSignature: ""
   });
 
   const gradeOptions = ["", "E", "G", "A", "P", "U"];
@@ -73,7 +73,6 @@ function App() {
           <input type="date" value={pilotInfo.opcValidUntil} onChange={e => handleChange("opcValidUntil", e.target.value)} className="border p-1 w-full" />
         </div>
       </div>
-
       {/* Session Controls */}
       <div className="space-y-2">
         {[["Training", trainingRequired, setTrainingRequired, trainingSession, setTrainingSession, "trainingLocation", "trainingInstructor"],
@@ -89,11 +88,12 @@ function App() {
               <>
                 <label className="ml-4">Session:</label>
                 <select value={session} onChange={e => setSession(Number(e.target.value))} className="border p-1 ml-2">
-                  {label === "Training" ? [1,2,3] : [1,2,3,4,5,6]}.map(n => <option key={n}>{n}</option>)
+                  {(label === "Training" ? [1, 2, 3] : [1, 2, 3, 4, 5, 6]).map(n => <option key={n}>{n}</option>)}
                 </select>
                 <label className="ml-4">Performed in:</label>
                 <select value={pilotInfo[locationKey]} onChange={e => handleChange(locationKey, e.target.value)} className="border p-1 ml-2">
-                  <option>FSTD</option><option>Aircraft</option>
+                  <option value="FSTD">FSTD</option>
+                  <option value="Aircraft">Aircraft</option>
                 </select>
                 <label className="ml-4">Initials:</label>
                 <input type="text" value={pilotInfo[initialsKey]} onChange={e => handleChange(initialsKey, e.target.value)} className="border p-1 ml-2" />
@@ -101,7 +101,7 @@ function App() {
             )}
           </div>
         ))}
-        <label className="block">
+        <label className="block mt-2">
           <input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} className="mr-2" />
           Show All Training/Checking Items
         </label>
@@ -120,14 +120,15 @@ function App() {
         </thead>
         <tbody>
           {visibleTasks.map(id => {
-            const isProgramTask = (trainingRequired && taskSchedule.training?.[trainingSession]?.includes(id)) ||
-                                  (checkingRequired && taskSchedule.checking?.[checkingSession]?.includes(id));
+            const isProgramTask =
+              (trainingRequired && taskSchedule.training?.[trainingSession]?.includes(id)) ||
+              (checkingRequired && taskSchedule.checking?.[checkingSession]?.includes(id));
             const green = showAdditionalItems && !isProgramTask ? "text-green-600" : "";
             return (
               <tr key={id}>
                 <td className={`border p-1 font-mono ${green}`}>{id}</td>
                 <td className={`border p-1 ${green}`}>{allTasks[id]}</td>
-                {trainingRequired &&
+                {trainingRequired && (
                   <td className="border p-1">
                     {(showAdditionalItems || taskSchedule.training?.[trainingSession]?.includes(id)) && (
                       <select value={grades[id]?.tGrade || ""} onChange={e => updateGrade(id, "tGrade", e.target.value)} className="border w-full p-1">
@@ -135,8 +136,8 @@ function App() {
                       </select>
                     )}
                   </td>
-                }
-                {checkingRequired &&
+                )}
+                {checkingRequired && (
                   <td className="border p-1">
                     {(showAdditionalItems || taskSchedule.checking?.[checkingSession]?.includes(id)) && (
                       <select value={grades[id]?.cGrade || ""} onChange={e => updateGrade(id, "cGrade", e.target.value)} className="border w-full p-1">
@@ -144,13 +145,12 @@ function App() {
                       </select>
                     )}
                   </td>
-                }
+                )}
               </tr>
             );
           })}
         </tbody>
       </table>
-
       {/* Signatures */}
       <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 border rounded mt-6">
         <div>
@@ -169,6 +169,8 @@ function App() {
           <label className="font-medium block">Date</label>
           <input type="date" value={pilotInfo.date} onChange={e => handleChange("date", e.target.value)} className="border p-1 w-full mb-2" />
         </div>
+
+        {/* Examiner section only if initials differ */}
         {pilotInfo.checkingInstructor && pilotInfo.checkingInstructor !== pilotInfo.trainingInstructor && (
           <div className="col-span-2 border-t pt-4">
             <h3 className="font-bold mb-2">Examiner Section</h3>
