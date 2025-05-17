@@ -3,7 +3,7 @@ import { allTasks, sectionTitles, taskSchedule } from "./taskData";
 import "./index.css";
 
 function App() {
-  const [trainingRequired, setTrainingRequired] = useState(true);
+  const [trainingRequired, setTrainingRequired] = useState(false);
   const [checkingRequired, setCheckingRequired] = useState(true);
   const [trainingSession, setTrainingSession] = useState(1);
   const [checkingSession, setCheckingSession] = useState(1);
@@ -48,7 +48,7 @@ function App() {
     <div className="p-4 max-w-6xl mx-auto text-sm space-y-4">
       <h1 className="text-2xl font-bold mb-4">4_10 Airplane FSTD Training and Checking</h1>
 
-      {/* Pilot and Flight Info */}
+      {/* Pilot Info */}
       <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 border rounded">
         {["name", "code", "license"].map(field => (
           <div key={field}>
@@ -75,9 +75,9 @@ function App() {
       </div>
       {/* Session Controls */}
       <div className="space-y-2">
-        {[["Training", trainingRequired, setTrainingRequired, trainingSession, setTrainingSession, "trainingLocation", "trainingInstructor"],
-          ["Checking", checkingRequired, setCheckingRequired, checkingSession, setCheckingSession, "checkingLocation", "checkingInstructor"]
-        ].map(([label, required, setRequired, session, setSession, locationKey, initialsKey]) => (
+        {[["Training", trainingRequired, setTrainingRequired, trainingSession, setTrainingSession, "trainingLocation", "trainingInstructor", "FSTD"],
+          ["Checking", checkingRequired, setCheckingRequired, checkingSession, setCheckingSession, "checkingLocation", "checkingInstructor", "FFS"]
+        ].map(([label, required, setRequired, session, setSession, locationKey, initialsKey, defaultLoc]) => (
           <div key={label}>
             <label className="font-semibold">{label}:</label>
             <select value={required ? "required" : "not_required"} onChange={e => setRequired(e.target.value === "required")} className="border p-1 ml-2">
@@ -92,7 +92,7 @@ function App() {
                 </select>
                 <label className="ml-4">Performed in:</label>
                 <select value={pilotInfo[locationKey]} onChange={e => handleChange(locationKey, e.target.value)} className="border p-1 ml-2">
-                  <option value="FSTD">FSTD</option>
+                  <option value={defaultLoc}>{defaultLoc}</option>
                   <option value="Aircraft">Aircraft</option>
                 </select>
                 <label className="ml-4">Initials:</label>
@@ -152,36 +152,99 @@ function App() {
         </tbody>
       </table>
       {/* Signatures */}
-      <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 border rounded mt-6">
+      <div className="bg-gray-50 p-4 border rounded mt-6 space-y-4">
         <div>
           <label className="font-medium block">Pilot Signature</label>
-          <input type="text" value={pilotInfo.pilotSignature} onChange={e => handleChange("pilotSignature", e.target.value)} className="border p-1 w-full" />
-        </div>
-        <div>
-          <label className="font-medium block">Instructor Signature</label>
-          <input type="text" value={pilotInfo.instructorSignature} onChange={e => handleChange("instructorSignature", e.target.value)} className="border p-1 w-full" />
-        </div>
-        <div className="col-span-2 border-t pt-4">
-          <label className="font-medium block">Instructor Name</label>
-          <input type="text" value={pilotInfo.instructorName} onChange={e => handleChange("instructorName", e.target.value)} className="border p-1 w-full mb-2" />
-          <label className="font-medium block">Instructor License Number</label>
-          <input type="text" value={pilotInfo.instructorLicense} onChange={e => handleChange("instructorLicense", e.target.value)} className="border p-1 w-full mb-2" />
-          <label className="font-medium block">Date</label>
-          <input type="date" value={pilotInfo.date} onChange={e => handleChange("date", e.target.value)} className="border p-1 w-full mb-2" />
+          <input
+            type="text"
+            value={pilotInfo.pilotSignature}
+            onChange={(e) => handleChange("pilotSignature", e.target.value)}
+            className="border p-1 w-full"
+          />
         </div>
 
-        {/* Examiner section only if initials differ */}
-        {pilotInfo.checkingInstructor && pilotInfo.checkingInstructor !== pilotInfo.trainingInstructor && (
-          <div className="col-span-2 border-t pt-4">
-            <h3 className="font-bold mb-2">Examiner Section</h3>
-            <label className="font-medium block">Examiner Name</label>
-            <input type="text" value={pilotInfo.examinerName} onChange={e => handleChange("examinerName", e.target.value)} className="border p-1 w-full mb-2" />
-            <label className="font-medium block">Examiner License Number</label>
-            <input type="text" value={pilotInfo.examinerLicense} onChange={e => handleChange("examinerLicense", e.target.value)} className="border p-1 w-full mb-2" />
-            <label className="font-medium block">Date</label>
-            <input type="date" value={pilotInfo.examinerDate} onChange={e => handleChange("examinerDate", e.target.value)} className="border p-1 w-full mb-2" />
-            <label className="font-medium block">Examiner Signature</label>
-            <input type="text" value={pilotInfo.examinerSignature} onChange={e => handleChange("examinerSignature", e.target.value)} className="border p-1 w-full mb-2" />
+        {/* Instructor Section */}
+        {trainingRequired && (
+          <div className="border-t pt-4 space-y-2">
+            <div>
+              <label className="font-medium block">Instructor Signature</label>
+              <input
+                type="text"
+                value={pilotInfo.instructorSignature}
+                onChange={(e) => handleChange("instructorSignature", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Instructor Name</label>
+              <input
+                type="text"
+                value={pilotInfo.instructorName}
+                onChange={(e) => handleChange("instructorName", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Instructor License Number</label>
+              <input
+                type="text"
+                value={pilotInfo.instructorLicense}
+                onChange={(e) => handleChange("instructorLicense", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Date</label>
+              <input
+                type="date"
+                value={pilotInfo.date}
+                onChange={(e) => handleChange("date", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Examiner Section */}
+        {checkingRequired && (
+          <div className="border-t pt-4 space-y-2">
+            <h3 className="font-bold text-base mb-2">Examiner Section</h3>
+            <div>
+              <label className="font-medium block">Examiner Name</label>
+              <input
+                type="text"
+                value={pilotInfo.examinerName}
+                onChange={(e) => handleChange("examinerName", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Examiner License Number</label>
+              <input
+                type="text"
+                value={pilotInfo.examinerLicense}
+                onChange={(e) => handleChange("examinerLicense", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Date</label>
+              <input
+                type="date"
+                value={pilotInfo.examinerDate}
+                onChange={(e) => handleChange("examinerDate", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
+            <div>
+              <label className="font-medium block">Examiner Signature</label>
+              <input
+                type="text"
+                value={pilotInfo.examinerSignature}
+                onChange={(e) => handleChange("examinerSignature", e.target.value)}
+                className="border p-1 w-full"
+              />
+            </div>
           </div>
         )}
       </div>
