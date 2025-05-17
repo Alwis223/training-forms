@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { allTasks, sectionTitles, taskSchedule } from "./taskData";
 
 function App() {
@@ -24,9 +23,88 @@ function App() {
   return (
     <div className="p-4 max-w-7xl mx-auto text-sm">
       <h1 className="text-xl font-bold mb-4">4_10 Airplane FSTD Training and Checking</h1>
-      ...
-      {/* Likęs JSX kaip buvo anksčiau, čia apkarpyta dėl vietos */}
-      ...
+
+      <div className="mb-4 space-y-2">
+        {/* TRAINING / CHECKING SELECT */}
+        {/* ... visa likusi UI logika */}
+      </div>
+
+      {/* DYNAMIC TABLES */}
+      {Object.entries(sectionTitles).map(([section, title]) => {
+        const taskIds = Object.keys(allTasks).filter(id => id.startsWith(section + "."));
+        const visibleIds = showAdditionalItems
+          ? taskIds
+          : taskIds.filter(id =>
+              (trainingRequired && taskSchedule.training?.[trainingSession]?.includes(id)) ||
+              (checkingRequired && taskSchedule.checking?.[checkingSession]?.includes(id))
+            );
+
+        if (visibleIds.length === 0) return null;
+
+        return (
+          <div key={section} className="mt-6">
+            <h2 className="font-bold mb-1 text-lg">{title}</h2>
+            <p className="text-sm text-gray-600 mb-2">
+              E – Excellent, G – Good, A – Acceptable, P – Poor, U – Unsatisfactory
+            </p>
+            <table className="w-full border-collapse text-sm mb-6">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-2 border w-1/12">ID</th>
+                  <th className="p-2 border w-7/12">Description</th>
+                  {trainingRequired && <th className="p-2 border w-2/12">Training Grade</th>}
+                  {checkingRequired && <th className="p-2 border w-2/12">Checking Grade</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {visibleIds.map(id => {
+                  const isMandatory =
+                    (trainingRequired && taskSchedule.training?.[trainingSession]?.includes(id)) ||
+                    (checkingRequired && taskSchedule.checking?.[checkingSession]?.includes(id));
+                  const isAdditional = showAdditionalItems && !isMandatory;
+
+                  return (
+                    <tr key={id} className="border-t">
+                      <td className={`p-2 border font-mono ${isAdditional ? "text-green-600" : ""}`}>{id}</td>
+                      <td className={`p-2 border ${isAdditional ? "text-green-600" : ""}`}>{allTasks[id]}</td>
+                      {trainingRequired && (
+                        <td className="p-2 border">
+                          {(showAdditionalItems || taskSchedule.training?.[trainingSession]?.includes(id)) && (
+                            <select
+                              className="border p-1 w-full"
+                              value={grades[id]?.tGrade || ""}
+                              onChange={e => updateGrade(id, "tGrade", e.target.value)}
+                            >
+                              {gradeOptions.map(g => (
+                                <option key={g} value={g}>{g}</option>
+                              ))}
+                            </select>
+                          )}
+                        </td>
+                      )}
+                      {checkingRequired && (
+                        <td className="p-2 border">
+                          {(showAdditionalItems || taskSchedule.checking?.[checkingSession]?.includes(id)) && (
+                            <select
+                              className="border p-1 w-full"
+                              value={grades[id]?.cGrade || ""}
+                              onChange={e => updateGrade(id, "cGrade", e.target.value)}
+                            >
+                              {gradeOptions.map(g => (
+                                <option key={g} value={g}>{g}</option>
+                              ))}
+                            </select>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
     </div>
   );
 }
