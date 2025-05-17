@@ -3,6 +3,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { allTasks, taskSchedule } from "./taskData";
 import "./index.css";
+npm install jspdf html2canvas;
 
 function App() {
   const exportRef = useRef();
