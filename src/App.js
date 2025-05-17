@@ -25,11 +25,68 @@ function App() {
       <h1 className="text-xl font-bold mb-4">4_10 Airplane FSTD Training and Checking</h1>
 
       <div className="mb-4 space-y-2">
-        {/* TRAINING / CHECKING SELECT */}
-        {/* ... visa likusi UI logika */}
+        <div>
+          <label className="font-semibold mr-2">Training:</label>
+          <select
+            value={trainingRequired ? "required" : "not_required"}
+            onChange={e => setTrainingRequired(e.target.value === "required")}
+            className="border p-1"
+          >
+            <option value="required">Required</option>
+            <option value="not_required">Not required</option>
+          </select>
+          {trainingRequired && (
+            <>
+              <label className="ml-4 mr-2">Session:</label>
+              <select
+                value={trainingSession}
+                onChange={e => setTrainingSession(Number(e.target.value))}
+                className="border p-1"
+              >
+                {[1, 2, 3].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+
+        <div>
+          <label className="font-semibold mr-2">Checking:</label>
+          <select
+            value={checkingRequired ? "required" : "not_required"}
+            onChange={e => setCheckingRequired(e.target.value === "required")}
+            className="border p-1"
+          >
+            <option value="required">Required</option>
+            <option value="not_required">Not required</option>
+          </select>
+          {checkingRequired && (
+            <>
+              <label className="ml-4 mr-2">Session:</label>
+              <select
+                value={checkingSession}
+                onChange={e => setCheckingSession(Number(e.target.value))}
+                className="border p-1"
+              >
+                {[1, 2, 3, 4, 5, 6].map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+
+        <div>
+          <label className="font-semibold mr-2">Show All Training/Checking Items:</label>
+          <input
+            type="checkbox"
+            checked={showAdditionalItems}
+            onChange={e => setShowAdditionalItems(e.target.checked)}
+          />
+        </div>
       </div>
 
-      {/* DYNAMIC TABLES */}
       {Object.entries(sectionTitles).map(([section, title]) => {
         const taskIds = Object.keys(allTasks).filter(id => id.startsWith(section + "."));
         const visibleIds = showAdditionalItems
@@ -47,6 +104,7 @@ function App() {
             <p className="text-sm text-gray-600 mb-2">
               E – Excellent, G – Good, A – Acceptable, P – Poor, U – Unsatisfactory
             </p>
+
             <table className="w-full border-collapse text-sm mb-6">
               <thead>
                 <tr className="bg-gray-100">
@@ -67,6 +125,7 @@ function App() {
                     <tr key={id} className="border-t">
                       <td className={`p-2 border font-mono ${isAdditional ? "text-green-600" : ""}`}>{id}</td>
                       <td className={`p-2 border ${isAdditional ? "text-green-600" : ""}`}>{allTasks[id]}</td>
+
                       {trainingRequired && (
                         <td className="p-2 border">
                           {(showAdditionalItems || taskSchedule.training?.[trainingSession]?.includes(id)) && (
@@ -82,6 +141,7 @@ function App() {
                           )}
                         </td>
                       )}
+
                       {checkingRequired && (
                         <td className="p-2 border">
                           {(showAdditionalItems || taskSchedule.checking?.[checkingSession]?.includes(id)) && (
