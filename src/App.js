@@ -1,3 +1,5 @@
+
+
 import React, { useState, useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -37,14 +39,12 @@ function App() {
     }));
   };
 
-  const getVisibleTasks = () => {
-    const trainingTasks = trainingRequired ? taskSchedule.training[trainingSession] || [] : [];
-    const checkingTasks = checkingRequired ? taskSchedule.checking[checkingSession] || [] : [];
-    const combined = new Set([...trainingTasks, ...checkingTasks]);
-    return showAdditionalItems ? Object.keys(allTasks) : [...combined];
-  };
+  const requiredTaskIds = new Set([
+    ...(trainingRequired ? taskSchedule.training[trainingSession] || [] : []),
+    ...(checkingRequired ? taskSchedule.checking[checkingSession] || [] : [])
+  ]);
 
-  const visibleTasks = getVisibleTasks();
+  const visibleTasks = showAdditionalItems ? Object.keys(allTasks) : [...requiredTaskIds];
 
   const generatePDF = () => {
     const input = exportRef.current;
@@ -66,7 +66,6 @@ function App() {
       <div ref={exportRef}>
         <h1 className="text-2xl font-bold mb-4">4_10 Airplane FSTD Training and Checking</h1>
 
-        {/* Pilot Info */}
         <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 border rounded">
           {["name", "code", "license"].map(field => (
             <div key={field}>
@@ -92,7 +91,6 @@ function App() {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-wrap gap-4 mt-4">
           <label><input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} /> Training Required</label>
           <label><input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} /> Checking Required</label>
@@ -134,9 +132,8 @@ function App() {
           )}
         </div>
 
-        {/* Table */}
         {Object.entries(sectionTitles).map(([section, title]) => {
-          const tasksInSection = getVisibleTasks().filter(id => id.startsWith(section));
+          const tasksInSection = visibleTasks.filter(id => id.startsWith(section));
           if (tasksInSection.length === 0) return null;
           return (
             <div key={section} className="mt-6">
@@ -153,8 +150,8 @@ function App() {
                 <tbody>
                   {tasksInSection.map(id => (
                     <tr key={id}>
-                      <td className={`border p-1 ${!getVisibleTasks().includes(id) ? "text-green-600" : ""}`}>{id}</td>
-                      <td className={`border p-1 ${!getVisibleTasks().includes(id) ? "text-green-600" : ""}`}>{allTasks[id]}</td>
+                      <td className={`border p-1 ${!requiredTaskIds.has(id) ? "text-green-600" : ""}`}>{id}</td>
+                      <td className={`border p-1 ${!requiredTaskIds.has(id) ? "text-green-600" : ""}`}>{allTasks[id]}</td>
                       {trainingRequired && (
                         <td className="border p-1">
                           <select value={grades[id]?.training || ""} onChange={e => updateGrade(id, "training", e.target.value)} className="w-full border p-1">
@@ -178,7 +175,6 @@ function App() {
         })}
       </div>
 
-      {/* PDF */}
       <button onClick={generatePDF} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Generate PDF
       </button>
