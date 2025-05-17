@@ -62,94 +62,143 @@ function App() {
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto text-sm space-y-4">
-      <div ref={exportRef}>
-        <h1 className="text-2xl font-bold mb-4">4_10 Airplane FSTD Training and Checking</h1>
+<div className="grid grid-cols-2 gap-4 mt-4">
+  {trainingRequired && (
+    <div>
+      <label className="block font-medium">Instructor Initials</label>
+      <input
+        type="text"
+        value={pilotInfo.trainingInstructor}
+        onChange={e => handleChange("trainingInstructor", e.target.value)}
+        className="border p-1 w-full"
+      />
+    </div>
+  )}
+  {checkingRequired && (
+    <div>
+      <label className="block font-medium">Examiner Initials</label>
+      <input
+        type="text"
+        value={pilotInfo.checkingInstructor}
+        onChange={e => handleChange("checkingInstructor", e.target.value)}
+        className="border p-1 w-full"
+      />
+    </div>
+  )}
+</div>
 
-        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 border rounded">
-          {["name", "code", "license"].map(field => (
-            <div key={field}>
-              <label className="block font-medium capitalize">{field}</label>
-              <input type="text" value={pilotInfo[field]} onChange={e => handleChange(field, e.target.value)} className="border p-1 w-full" />
-            </div>
-          ))}
-          <div>
-            <label className="block font-medium">Aircraft Type</label>
-            <select value={pilotInfo.aircraftType} onChange={e => handleChange("aircraftType", e.target.value)} className="border p-1 w-full">
-              {["H25B", "F2TH", "B737"].map(type => <option key={type}>{type}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block font-medium">Function</label>
-            <select value={pilotInfo.function} onChange={e => handleChange("function", e.target.value)} className="border p-1 w-full">
-              {["PIC", "FO"].map(fn => <option key={fn}>{fn}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block font-medium">OPC Valid Until</label>
-            <input type="date" value={pilotInfo.opcValidUntil} onChange={e => handleChange("opcValidUntil", e.target.value)} className="border p-1 w-full" />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-6 mt-4 border p-2 rounded bg-gray-100">
-          <label className="flex items-center gap-1">
-          <input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} />
-          <span>Training Required</span>
-            </label>
-          <label className="flex items-center gap-1">
-          <input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} />
-          <span>Checking Required</span>
-            </label>
-          <label className="flex items-center gap-1">
-          <input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} />
-          <span>Show All Training/Checking Items</span>
-            </label>
-        </div>
-
-
-        <div className="grid grid-cols-2 gap-4 mt-4">
-        {Object.entries(sectionTitles).map(([section, title]) => {
-          const tasksInSection = visibleTasks.filter(id => id.startsWith(section));
-          if (tasksInSection.length === 0) return null;
-          return (
-            <div key={section} className="mt-6">
-              <h3 className="font-bold text-base mb-2">{title}</h3>
-              <table className="w-full border text-xs">
-                <thead>
-                  <tr>
-                    <th className="border p-1">ID</th>
-                    <th className="border p-1">Description</th>
-                    {trainingRequired && <th className="border p-1">Training Grade</th>}
-                    {checkingRequired && <th className="border p-1">Checking Grade</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasksInSection.map(id => (
-                    <tr key={id}>
-                      <td className={`border p-1 ${!requiredTaskIds.has(id) ? "text-green-600" : ""}`}>{id}</td>
-                      <td className={`border p-1 ${!requiredTaskIds.has(id) ? "text-green-600" : ""}`}>{allTasks[id]}</td>
-                      {trainingRequired && (
-                        <td className="border p-1">
-                          <select value={grades[id]?.training || ""} onChange={e => updateGrade(id, "training", e.target.value)} className="w-full border p-1">
-                            {gradeOptions.map(g => <option key={g} value={g}>{g}</option>)}
-                          </select>
-                        </td>
-                      )}
-                      {checkingRequired && (
-                        <td className="border p-1">
-                          <select value={grades[id]?.checking || ""} onChange={e => updateGrade(id, "checking", e.target.value)} className="w-full border p-1">
-                            {gradeOptions.map(g => <option key={g} value={g}>{g}</option>)}
-                          </select>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
+{/* Session selection and performed in */}
+<div className="grid grid-cols-2 gap-4 mt-4">
+  {trainingRequired && (
+    <>
+      <div>
+        <label className="block font-medium">Training Session</label>
+        <select value={trainingSession} onChange={e => setTrainingSession(Number(e.target.value))} className="border p-1 w-full">
+          {[1, 2, 3].map(n => <option key={n}>{n}</option>)}
+        </select>
       </div>
+      <div>
+        <label className="block font-medium">Performed in (Training)</label>
+        <select value={pilotInfo.trainingLocation} onChange={e => handleChange("trainingLocation", e.target.value)} className="border p-1 w-full">
+          {["FSTD", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
+        </select>
+      </div>
+    </>
+  )}
+  {checkingRequired && (
+    <>
+      <div>
+        <label className="block font-medium">Checking Session</label>
+        <select value={checkingSession} onChange={e => setCheckingSession(Number(e.target.value))} className="border p-1 w-full">
+          {[1, 2, 3, 4, 5, 6].map(n => <option key={n}>{n}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className="block font-medium">Performed in (Checking)</label>
+        <select value={pilotInfo.checkingLocation} onChange={e => handleChange("checkingLocation", e.target.value)} className="border p-1 w-full">
+          {["FFS", "Aircraft"].map(loc => <option key={loc}>{loc}</option>)}
+        </select>
+      </div>
+    </>
+  )}
+</div>
+
+{/* Signatures */}
+<div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div>
+    <label className="font-medium block">Student Signature</label>
+    <input
+      type="text"
+      value={pilotInfo.pilotSignature}
+      onChange={e => handleChange("pilotSignature", e.target.value)}
+      className="border p-1 w-full"
+    />
+  </div>
+  {trainingRequired && (
+    <div>
+      <label className="font-medium block">Instructor Signature</label>
+      <input
+        type="text"
+        value={pilotInfo.instructorSignature}
+        onChange={e => handleChange("instructorSignature", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Instructor Name</label>
+      <input
+        type="text"
+        value={pilotInfo.instructorName}
+        onChange={e => handleChange("instructorName", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Instructor License</label>
+      <input
+        type="text"
+        value={pilotInfo.instructorLicense}
+        onChange={e => handleChange("instructorLicense", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Date</label>
+      <input
+        type="date"
+        value={pilotInfo.date}
+        onChange={e => handleChange("date", e.target.value)}
+        className="border p-1 w-full"
+      />
+    </div>
+  )}
+  {checkingRequired && (
+    <div>
+      <label className="font-medium block">Examiner Name</label>
+      <input
+        type="text"
+        value={pilotInfo.examinerName}
+        onChange={e => handleChange("examinerName", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Examiner License</label>
+      <input
+        type="text"
+        value={pilotInfo.examinerLicense}
+        onChange={e => handleChange("examinerLicense", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Date</label>
+      <input
+        type="date"
+        value={pilotInfo.examinerDate}
+        onChange={e => handleChange("examinerDate", e.target.value)}
+        className="border p-1 w-full"
+      />
+      <label className="font-medium block">Examiner Signature</label>
+      <input
+        type="text"
+        value={pilotInfo.examinerSignature}
+        onChange={e => handleChange("examinerSignature", e.target.value)}
+        className="border p-1 w-full"
+      />
+    </div>
+  )}
+</div>
 
       <button onClick={generatePDF} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Generate PDF
