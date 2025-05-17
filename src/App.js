@@ -91,11 +91,21 @@ function App() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 mt-4">
-          <label><input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} /> Training Required</label>
-          <label><input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} /> Checking Required</label>
-          <label><input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} /> Show All Training/Checking Items</label>
+        <div className="flex flex-wrap items-center gap-6 mt-4 border p-2 rounded bg-gray-100">
+          <label className="flex items-center gap-1">
+          <input type="checkbox" checked={trainingRequired} onChange={e => setTrainingRequired(e.target.checked)} />
+          <span>Training Required</span>
+            </label>
+          <label className="flex items-center gap-1">
+          <input type="checkbox" checked={checkingRequired} onChange={e => setCheckingRequired(e.target.checked)} />
+          <span>Checking Required</span>
+            </label>
+          <label className="flex items-center gap-1">
+          <input type="checkbox" checked={showAdditionalItems} onChange={e => setShowAdditionalItems(e.target.checked)} />
+          <span>Show All Training/Checking Items</span>
+            </label>
         </div>
+
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           {trainingRequired && (
